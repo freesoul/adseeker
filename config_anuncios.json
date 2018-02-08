@@ -1,0 +1,20 @@
+[
+	{
+	'name'			:	'Portátiles baratos',
+	'servidores'		:	['milanuncios'],
+	'search'		:	'portátil',
+	'características'	:	[{
+					'precio_min'	:	150,
+					'precio_max'	:	300,
+					'palabras_clave':	['i7', '8\s?gb']
+					},{
+					'precio_min'	:	100,
+					'precio_max'	:	300,
+					'palabras_clave':	['msi']
+					}]
+	'origen'
+	
+
+
+	}
+]
