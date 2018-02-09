@@ -647,3 +647,33 @@ ATTENTION: default value of option force_s3tc_enable overridden by environment.
 ATTENTION: default value of option force_s3tc_enable overridden by environment.
 [GFX1-]: Receive IPC close with reason=AbnormalShutdown
 [Child 17211, Chrome_ChildThread] WARNING: pipe error (35): Connection reset by peer: file /build/firefox-ox8TnP/firefox-58.0.1+build1/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 353
+1518187826647	geckodriver	INFO	geckodriver 0.19.1
+1518187826677	geckodriver	INFO	Listening on 127.0.0.1:45413
+1518187827856	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-profile" "/tmp/rust_mozprofile.WQKr7Xl5N5UZ"
+1518187829454	Marionette	INFO	Enabled via --marionette
+1518187833255	Marionette	INFO	Listening on port 43841
+1518187833821	Marionette	WARN	TLS certificate errors will be ignored for this session
+ATTENTION: default value of option force_s3tc_enable overridden by environment.
+1518188318359	geckodriver	INFO	geckodriver 0.19.1
+1518188318362	geckodriver	INFO	Listening on 127.0.0.1:47531
+1518188319485	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-profile" "/tmp/rust_mozprofile.ZuLAkKJkzFDJ"
+1518188320029	Marionette	INFO	Enabled via --marionette
+1518188321753	Marionette	INFO	Listening on port 37967
+1518188321794	Marionette	WARN	TLS certificate errors will be ignored for this session
+[Child 22500, Chrome_ChildThread] WARNING: pipe error (3): Connection reset by peer: file /build/firefox-ox8TnP/firefox-58.0.1+build1/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 353
+1518188345811	geckodriver	INFO	geckodriver 0.19.1
+1518188345814	geckodriver	INFO	Listening on 127.0.0.1:34581
+1518188346940	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-profile" "/tmp/rust_mozprofile.V83Y7VllOBaV"
+1518188347485	Marionette	INFO	Enabled via --marionette
+1518188349181	Marionette	INFO	Listening on port 40403
+1518188349248	Marionette	WARN	TLS certificate errors will be ignored for this session
+ATTENTION: default value of option force_s3tc_enable overridden by environment.
+[Child 22667, Chrome_ChildThread] WARNING: pipe error (45): Connection reset by peer: file /build/firefox-ox8TnP/firefox-58.0.1+build1/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 353
+[Child 22667, Chrome_ChildThread] WARNING: pipe error (3): Connection reset by peer: file /build/firefox-ox8TnP/firefox-58.0.1+build1/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 353
+1518188412315	geckodriver	INFO	geckodriver 0.19.1
+1518188412318	geckodriver	INFO	Listening on 127.0.0.1:45641
+1518188413417	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-profile" "/tmp/rust_mozprofile.Ot5APP7uT88l"
+1518188413977	Marionette	INFO	Enabled via --marionette
+1518188415606	Marionette	INFO	Listening on port 38431
+1518188415636	Marionette	WARN	TLS certificate errors will be ignored for this session
+ATTENTION: default value of option force_s3tc_enable overridden by environment.

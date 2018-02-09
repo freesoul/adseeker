@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 from modules.milanuncios import Milanuncios
 
 
@@ -7,6 +8,7 @@ ret = Milanuncios().query(
                             hasta=400,
                             query='portátil',
                             max_pag=3,
+                            max_minutes=3*60,
                             filtros=[
                                 {
                                     'con'   :   [

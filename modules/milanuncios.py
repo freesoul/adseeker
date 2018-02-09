@@ -44,10 +44,12 @@ class Milanuncios:
               hasta,
               query,
               filtros,
-              max_pag
+              max_pag,
+              max_minutes
               ):
 
         self.results = []
+        self.max_minutes = max_minutes
 
         if LOAD_DATA:
             with open('debug_milanuncios.txt', 'r') as f:
@@ -77,10 +79,10 @@ class Milanuncios:
                 wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.contenidoPie")))
                 html = self.driver.page_source
 
-                results, num_total_ads = self.__parse_results(html, filtros)
+                results, num_total_ads, max_minutes_reached = self.__parse_results(html, filtros)
                 self.results.extend(results)
 
-                if SAVE_DATA or num_total_ads < MAX_RESULT_POR_PAGINA: # No more pages or save just 1 if debugging
+                if SAVE_DATA or num_total_ads < MAX_RESULT_POR_PAGINA or max_minutes_reached: # No more pages or save just 1 if debugging
                     print('Finished')
                     break
 
@@ -115,6 +117,9 @@ class Milanuncios:
 
         items_with_phone = []
         for item in items:
+
+            if not item['time'] is None and item['time'] > self.max_minutes:
+                return items_with_phone, len(items), True
 
             filtro_ok = False
             for filtro in filtros:
@@ -152,7 +157,7 @@ class Milanuncios:
                         print(item_with_phone)
 
         if DEBUG: print('Found {0} interesting ads'.format(len(items_with_phone)))
-        return items_with_phone, len(items)
+        return items_with_phone, len(items), False
 
     def __time_to_min(self, time_string):
         time_data = time_string.split()
@@ -195,7 +200,8 @@ class Milanuncios:
               hasta,
               query,
               filtros,
-              max_pag=3
+              max_pag=3,
+              max_minutes=60*24
               ):
 
         args = locals()
