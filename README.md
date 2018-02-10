@@ -1,6 +1,6 @@
 # adseeker
 
-This is a project I am slowly developing in my dead hours at job.
+This is a project I am slowly developing at job because of my partitioned working hours.
 
 This software aims to web-scrap several websites (currently only one) to find interesting and recent advertisements, and collects the contact information.
 
