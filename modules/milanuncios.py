@@ -6,6 +6,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
+from selenium.webdriver.chrome.options import Options
+
 from urllib.parse import urlencode
 
 from time import sleep
@@ -13,89 +15,204 @@ from time import sleep
 import re
 
 
-
-
+USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36"
 DEBUG = True
 LOAD_DATA = False
 SAVE_DATA = False
-MAX_RESULT_POR_PAGINA = 25
-SLEEP = 1
+SLEEP = 3
 
 
 
 class Milanuncios:
 
-    results = []
+
+
+    #########################################################
+    #
+    #   Open webdriver
+    #
+    #########################################################
 
     def __init__(self):
-        self.driver = webdriver.Firefox()
+        opts = Options()
+        opts.add_argument("--user-agent="+USER_AGENT)
+        #opts.add_argument("user-data-dir=/home/bytes/.config/google-chrome/Default")
+        opts.add_argument('--disable-extensions')
+        opts.add_argument('--profile-directory=Default')
+        opts.add_argument("--incognito")
+        opts.add_argument("--disable-plugins-discovery");
+        opts.add_argument("--start-maximized")
+        self.driver = webdriver.Chrome(chrome_options=opts)
+        #sleep(29493)
         return
 
 
 
+    #########################################################
+    #
+    #   Close webdriver
+    #
+    #########################################################
     def __del__(self):
+        if DEBUG: sleep(10*60)
         self.driver.close()
 
 
 
-    def __get_results(self,
-              zona,
-              desde,
-              hasta,
-              query,
-              filtros,
-              max_pag,
-              max_minutes
-              ):
+    #########################################################
+    #
+    #   Helpers
+    #
+    #########################################################
 
-        self.results = []
-        self.max_minutes = max_minutes
 
+    # Funcińo para obtener el tiempo del anuncio en minutos
+    def __time_to_min(self, time_string):
+        time_data = time_string.split()
+
+        if time_data[1]=='min':
+            time_multiplier = 1
+        elif time_data[1]=='horas':
+            time_multiplier = 60
+        elif 'día' in time_data[1]:
+            time_multiplier = 60*24
+        else:
+            return None # años?
+
+        return int(time_data[0])  * time_multiplier
+
+
+
+    #########################################################
+    #
+    #   Go through webpages
+    #
+    #########################################################
+
+    def __get_results(
+            self,
+            zona,
+            desde,
+            hasta,
+            query,
+            filtros,
+            max_pag,
+            max_minutes,
+            max_ads=99999,
+            pag=1,
+            num_ads=0
+        ):
+
+        # debug case
         if LOAD_DATA:
             with open('debug_milanuncios.txt', 'r') as f:
                 html = f.read()
-                self.results = self.__parse_results(html, filtros)
+                results = self.__parse_results(html, filtros, max_minutes)
         else:
 
-            url_query = 'https://www.milanuncios.com/anuncios-en-{0}/{1}.htm'.format(zona,'-'.join(query.split(' ')))
+            # Real case
 
-            for pagina in range(1,max_pag+1):
+            url_query = 'https://www.milanuncios.com/anuncios-en-{0}/{1}.htm'.format(
+                zona,
+                '-'.join(query.lower().split(' '))
+            )
 
-                print("Pagina {0}".format(pagina))
+            print("Pagina {0}".format(pag))
 
-                data = {
-                    'desde' :   desde,
-                    'hasta' :   hasta,
-                    'cerca' :   's',
-                    'demanda'   :   'n',
-                    'vendedor'  :   'part',
-                    'pagina'    :   pagina
-                }
+            data = {
+                'desde' :   desde,
+                'hasta' :   hasta,
+                'cerca' :   's',
+                'demanda'   :   'n',
+                'vendedor'  :   'part',
+                'pagina'    :   pag
+            }
 
-                data = urlencode(data)
+            data = urlencode(data)
 
-                self.driver.get(url_query + '?' + data)
-                wait = WebDriverWait(self.driver, 15)
-                wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.contenidoPie")))
-                html = self.driver.page_source
+            self.driver.get(url_query + '?' + data)
+            self.espera_pagina_cargada()
 
-                results, num_total_ads, max_minutes_reached = self.__parse_results(html, filtros)
-                self.results.extend(results)
+            sleep(SLEEP) # Minimum delay between requests
 
-                if SAVE_DATA or num_total_ads < MAX_RESULT_POR_PAGINA or max_minutes_reached: # No more pages or save just 1 if debugging
-                    print('Finished')
-                    break
+            html = self.driver.page_source
 
-                print("-"*80)
+            results, b_minutes_reached, bNextPage = self.__parse_results(html, filtros, max_minutes)
 
-                sleep(SLEEP)
+            num_ads_new = num_ads + len(results)
 
-        return self.results
+            if (
+                b_minutes_reached or
+                num_ads_new >= max_ads or
+                SAVE_DATA   # No more pages or save just 1 if debugging
+            ):
+                print('Finished (max minutes or ads)')
+
+            else:
+
+                if bNextPage and pag < max_pag:
+                    
+                    #print("Going to page {0}".format(pag+1))
+                    next_page_results = self.__get_results(
+                        zona,
+                        desde,
+                        hasta,
+                        query,
+                        filtros,
+                        max_pag,
+                        max_minutes,
+                        max_ads,
+                        pag + 1,
+                        num_ads_new
+                    )
+                    results.extend(next_page_results)
+
+                else:
+                    print("Finished (max pag reached)")
+
+        return results
 
 
 
-    def __parse_results(self, html, filtros):
+    #########################################################
+    #
+    #   Espera que se haya cargado la página
+    #
+    #########################################################
+
+    def espera_pagina_cargada(self):
+        wait = WebDriverWait(self.driver, 15)
+        wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.contenidoPie")))
+
+
+
+    #########################################################
+    #
+    #   Open webdriver
+    #
+    #########################################################
+
+    def __parse_results(self, html, filtros, max_minutes):
+
         soup = BeautifulSoup(html, 'html.parser')
+
+
+        #########################################################
+        #
+        #   Test whether there is a next page or not
+        #
+        #########################################################
+
+        container_paginator = soup.select_one('div.adlist-paginator-pages')
+        b_next_page = container_paginator!=None and 'siguiente' in container_paginator.get_text().lower()
+
+
+
+        #########################################################
+        #
+        #   Get ads
+        #
+        #########################################################
 
         #container = soup.find("div", {"id":"cuerpo"})
         container = soup.select_one('div#cuerpo')
@@ -113,14 +230,24 @@ class Milanuncios:
             'abstract'  :   item.select_one('div.tx').get_text()
         } for item in items]
 
-        if DEBUG: print('Detected {0} ads'.format(len(items)))
+        if DEBUG: print('Detected {0} ads (in total at current page)'.format(len(items)))
+
+
+
+        #########################################################
+        #
+        #   Filter interesting ads
+        #
+        #########################################################
 
         items_with_phone = []
         for item in items:
 
-            if not item['time'] is None and item['time'] > self.max_minutes:
-                return items_with_phone, len(items), True
+            # Max time reached?
+            if not item['time'] is None and item['time'] > max_minutes:
+                return items_with_phone, True, b_next_page # that true is b_minutes_reached
 
+            # Test ad filters
             filtro_ok = False
             for filtro in filtros:
 
@@ -147,32 +274,30 @@ class Milanuncios:
                     filtro_ok = True
                     break
 
+            # Ad filters ok?
             if filtro_ok:
+
+                # If so, look for phone info
+                item_with_phone = item
                 contact_info = self.__get_phone(item['id'])
                 if contact_info and len(contact_info['telefonos']) > 0:
-                    item_with_phone = item
                     item_with_phone.update(contact_info)
-                    items_with_phone.append(item_with_phone)
-                    if DEBUG:
-                        print(item_with_phone)
+                items_with_phone.append(item_with_phone)
+                if DEBUG:
+                    print(item_with_phone)
+            
+            last_time = item['time']
 
-        if DEBUG: print('Found {0} interesting ads'.format(len(items_with_phone)))
-        return items_with_phone, len(items), False
+        if DEBUG: print('Found {0} interesting ads on current page'.format(len(items_with_phone)))
+        return items_with_phone, False, b_next_page  # that true is b_minutes_reached
 
-    def __time_to_min(self, time_string):
-        time_data = time_string.split()
 
-        if time_data[1]=='min':
-            time_multiplier = 1
-        elif time_data[1]=='horas':
-            time_multiplier = 60
-        elif 'día' in time_data[1]:
-            time_multiplier = 60*24
-        else:
-            return None # años?
 
-        return int(time_data[0])  * time_multiplier
-
+    #########################################################
+    #
+    #   Open webdriver
+    #
+    #########################################################
 
     def __get_phone(self, _id):
         try:
@@ -194,6 +319,12 @@ class Milanuncios:
 
 
 
+    #########################################################
+    #
+    #   The function to call!!!
+    #
+    #########################################################
+
     def query(self,
               zona,
               desde,
@@ -201,9 +332,10 @@ class Milanuncios:
               query,
               filtros,
               max_pag=3,
-              max_minutes=60*24
+              max_minutes=60*24,
+              max_ads=99999
               ):
 
         args = locals()
         del args['self']
-        self.__get_results(**args)
+        return self.__get_results(**args)

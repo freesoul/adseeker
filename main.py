@@ -6,9 +6,10 @@ ret = Milanuncios().query(
                             zona='madrid',
                             desde=150,
                             hasta=400,
-                            query='portátil',
+                            query='portatil',
                             max_pag=3,
-                            max_minutes=3*60,
+                            max_minutes=60*24*10000,
+                            max_ads=1000,
                             filtros=[
                                 {
                                     'con'   :   [
