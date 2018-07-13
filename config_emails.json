@@ -1,0 +1,7 @@
+{
+	"Fran"	:	{
+		"email_smtp"	:	"smtp.gmail.com:587",
+		"email_address"	:	"kener18@gmail.com",
+		"email_password":	""
+	}
+}
