@@ -7,44 +7,57 @@ The intention is that we automatically send a Whatsap saying that we are interes
 
 ## Example
 
-### Code
+Configure `config_emails.json` and `config_queries.json` and run `python3 main.py`
+
+
+### Example `config_queries.json` with 1 query
 
 ```
-from modules.milanuncios import Milanuncios
+[
+	{
+		"name"			:	"Portátiles baratos",
 
+		"modules"		:	["milanuncios"],
 
-ret = Milanuncios().query(
-                            zone='madrid',
-                            price_min=150,
-                            price_max=400,
-                            query='portatil',
-                            max_pag=99999, # no limitamos por pagina
-                            max_minutes=60*24*2.5, # limitamos por antiguedad: dos dias y medio
-                            max_ads=1000, # no limitamos por numero de anuncios
-                            filtros=[
-                                {
-                                    'con'   :   [
-                                                    ['(?:12|16)\s*(?:gb|giga)', 'i[78]'], # con mucha ram
-                                                    ['(?:12|16)\s*(?:gb|giga)', 'msi', 'ddr5'],
-                                                    ['i[678][\-\s][678][0-9]{3}'], # buen procesador
-                                                    ['1[0-9]{3}\s*gtx'], # nvidia
-                                                    ['9[0-9]{2}\s*gtx'],
-                                                    ['1[0-9]{3}\s*(?:gt|rx)'], # radeon
-                                                    ['9[0-9]{2}\s*(?:gt|rx)'], 
-                                                    ['msi'], # buena marca
-                                                    ['urge'] # cosas rebajadas
+		"query_args" : {
+			"query"		:	"portátil",
 
-                                                ],
-                                    'sin'   :   [
-                                                    #'intel graphics',
-                                                    '4\s*(?:gb|giga)',
-                                                    'rot[oa]',
-                                                    'torre'
-                                                ]
-                                }
+			"zone"	:	"madrid",
 
-                            ]
-                         )
+			"max_minutes"	:	120,
+
+			"max_ads"		:	99999,
+			"max_pag"		:	3,
+
+			"price_min"		:	150,
+			"price_max"		:	300,
+
+			"filters_with"	:	[
+	                                ["(?:12|16)\\s*(?:gb|giga)", "i[78]"],
+	                                ["(?:12|16)\\s*(?:gb|giga)", "msi", "ddr5"],
+	                                ["i[678][\\-\\s][678][0-9]{3}"],
+	                                ["1[0-9]{3}\\s*gtx"], 
+	                                ["9[0-9]{2}\\s*gtx"],
+	                                ["1[0-9]{3}\\s*(?:gt|rx)"], 
+	                                ["9[0-9]{2}\\s*(?:gt|rx)"], 
+	                                ["msi"],
+	                                ["urge"] 
+	                            ],
+
+	       "filters_without"   :   [
+		                            "4\\s*(?:gb|giga)",
+		                            "rot[oa]",
+		                            "torre"
+		                        ]
+		},
+
+		"run_at"	:	null,
+		"rut_each"	:	1,
+
+		"notify"	:	"Fran",
+		"notifier"	:	"Fran"
+	}
+]
 ```
 
 ### Output
