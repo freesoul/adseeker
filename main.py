@@ -2,8 +2,13 @@
 
 import logging
 import json
+import os
+import importlib
 
 import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.header import Header
 
 from modules.milanuncios import Milanuncios
 
@@ -18,6 +23,10 @@ class Adseeker():
 
         self._load_config()
         self.logger.info("Loaded configuration")
+
+        self._load_modules()
+
+        self.ads = []
 
 
 
@@ -44,11 +53,11 @@ class Adseeker():
         try:
             with open("config_emails.json", "r") as f:
                 data = f.read()
-            emails = json.loads(data)
+            self.emails = json.loads(data)
 
             with open("config_queries.json", "r") as f:
                 data = f.read()
-            queries = json.loads(data)
+            self.queries = json.loads(data)
 
         except Exception as e:
             self.logger.warning("Failed to load config_emails.json or config_queries.json")
@@ -57,33 +66,65 @@ class Adseeker():
 
 
 
-    def email(self, config, ads):
+    def _load_modules(self):
+        self.modules = {}
+        module_files = [item for item in os.listdir('modules') if item[-3:]=='.py']
+        for module_file in module_files:
+            module_name = module_file[:-3]
+            module_class_name = module_name.title()
+            module_lib = importlib.import_module('modules.{0}'.format(module_name))
+            module_class = getattr(module_lib, module_class_name)
+            self.modules[module_name.lower()] = module_class
+            self.logger.info("Loaded module: {0}".format(module_name))
 
-        if len(ads) == 0:
-            self.logger.info("Skipping emails (0 interesting ads)")
-            return False
+
+
+    def email_ads(self):
+        pass
+
+
+
+    def _email(self, config, _msg):
+
+        # if len(ads) == 0:
+        #     self.logger.info("Skipping emails (0 interesting ads)")
+        #     return False
 
         try:
-            email_notifier = emails[config['notifier']]
-            email_notify = emails[config['notify']]
+            email_notifier = self.emails[config['notifier']]
+            email_notify = self.emails[config['notify']]
         except:
             self.logger.info("Email data missing")
             return False
 
-        msg = "\r\n".join([
-          "From: {0}".format(email_notifier['email_address']),
-          "To: {0}".format(email_notify['email_address']),
-          "Subject: Ads report",
-          "",
-          str(ads) # format this to a better report
-          ])
+        # msg = "\r\n".join([
+        #   "From: {0}".format(email_notifier['email_address']),
+        #   "To: {0}".format(email_notify['email_address']),
+        #   "Subject: Ads report",
+        #   "Content-Type: text/html; charset=UTF-8",
+        #   "",
+        #   msg # format this for a better report
+        #   ])
+
+
+        msg = MIMEMultipart('alternative')
+        msg.set_charset('utf8')
+        msg['From'] = email_notifier['email_address']
+        msg['To'] = email_notify['email_address']
+        msg['Subject'] = Header(
+            'Ads report'.encode('utf-8'),
+            'UTF-8'
+        ).encode()
+        msg.attach(MIMEText(_msg.encode('utf-8'), 'html', 'UTF-8'))  
+
+
 
         try:
             server = smtplib.SMTP(email_notifier['email_smtp'])
             server.ehlo()
             server.starttls()
             server.login(email_notifier['email_address'],email_notifier['email_password'])
-            server.sendmail(email_notifier['email_address'], email_notify['email_address'], msg)
+            server.sendmail(email_notifier['email_address'], email_notify['email_address'], msg.as_string())
             server.quit()
         except Exception as e:
             self.logger.info("Failed sending mail")
@@ -97,48 +138,30 @@ class Adseeker():
     def run_at(self, dt):
         pass
 
+
+
     def run_once(self):
-        pass
+
+        for query in self.queries:
+            for module in query['modules']:
+                module_key = module.lower()
+                if not module_key in self.modules: continue
+
+                module_obj = self.modules[module_key]()
+
+                ads = module_obj.query(**query['query_args'])
+
+                if ads: self.ads = self.ads + ads
+
+                self._email(query, str(ads)) # test
+
+
 
     def run_each(self):
         pass
 
 
+
+
 adseeker = Adseeker()
-
-exit(0)
-
-
-
-ret = Milanuncios().query(
-                            zona='madrid',
-                            desde=150,
-                            hasta=400,
-                            query='portatil',
-                            max_pag=99999, # no limitamos por pagina
-                            max_minutes=60*24*2.5, # limitamos por antiguedad: dos dias y medio
-                            max_ads=1000, # no limitamos por numero de anuncios
-                            filtros=[
-                                {
-                                    'con'   :   [
-                                                    ['(?:12|16)\s*(?:gb|giga)', 'i[78]'], # con mucha ram
-                                                    ['(?:12|16)\s*(?:gb|giga)', 'msi', 'ddr5'],
-                                                    ['i[678][\-\s][678][0-9]{3}'], # buen procesador
-                                                    ['1[0-9]{3}\s*gtx'], # nvidia
-                                                    ['9[0-9]{2}\s*gtx'],
-                                                    ['1[0-9]{3}\s*(?:gt|rx)'], # radeon
-                                                    ['9[0-9]{2}\s*(?:gt|rx)'], 
-                                                    ['msi'], # buena marca
-                                                    ['urge'] # cosas rebajadas
-
-                                                ],
-                                    'sin'   :   [
-                                                    #'intel graphics',
-                                                    '4\s*(?:gb|giga)',
-                                                    'rot[oa]',
-                                                    'torre'
-                                                ]
-                                }
-
-                            ]
-                         )
+adseeker.run_once()

@@ -54,7 +54,7 @@ class Milanuncios:
     #
     #########################################################
     def __del__(self):
-        if DEBUG: sleep(10*60)
+        # if DEBUG: sleep(10*60)
         self.driver.close()
 
 
@@ -91,11 +91,12 @@ class Milanuncios:
 
     def __get_results(
             self,
-            zona,
-            desde,
-            hasta,
+            zone,
+            price_min,
+            price_max,
             query,
-            filtros,
+            filters_with,
+            filters_without,
             max_pag,
             max_minutes,
             max_ads=99999,
@@ -107,21 +108,21 @@ class Milanuncios:
         if LOAD_DATA:
             with open('debug_milanuncios.txt', 'r') as f:
                 html = f.read()
-                results = self.__parse_results(html, filtros, max_minutes)
+                results = self.__parse_results(html, filters_with, filters_without, max_minutes)
         else:
 
             # Real case
 
             url_query = 'https://www.milanuncios.com/anuncios-en-{0}/{1}.htm'.format(
-                zona,
+                zone,
                 '-'.join(query.lower().split(' '))
             )
 
             print("Pagina {0}".format(pag))
 
             data = {
-                'desde' :   desde,
-                'hasta' :   hasta,
+                'desde' :   price_min,
+                'hasta' :   price_max,
                 'cerca' :   's',
                 'demanda'   :   'n',
                 'vendedor'  :   'part',
@@ -137,7 +138,7 @@ class Milanuncios:
 
             html = self.driver.page_source
 
-            results, b_minutes_reached, bNextPage = self.__parse_results(html, filtros, max_minutes)
+            results, b_minutes_reached, bNextPage = self.__parse_results(html, filters_with, filters_without, max_minutes)
 
             num_ads_new = num_ads + len(results)
 
@@ -154,11 +155,12 @@ class Milanuncios:
                     
                     #print("Going to page {0}".format(pag+1))
                     next_page_results = self.__get_results(
-                        zona,
-                        desde,
-                        hasta,
+                        zone,
+                        price_min,
+                        price_max,
                         query,
-                        filtros,
+                        filters_with,
+                        filters_without,
                         max_pag,
                         max_minutes,
                         max_ads,
@@ -192,7 +194,7 @@ class Milanuncios:
     #
     #########################################################
 
-    def __parse_results(self, html, filtros, max_minutes):
+    def __parse_results(self, html, filters_with, filters_without, max_minutes):
 
         soup = BeautifulSoup(html, 'html.parser')
 
@@ -225,7 +227,7 @@ class Milanuncios:
             'link'      :   'https://www.milanuncios.com'+item.select_one('a.aditem-detail-title')['href'],
             'time'      :   self.__time_to_min(item.select_one('div.aditem-header').select_one('div.x6.display-desktop').get_text()),
             'id'        :   item.select_one('div.aditem-header').select_one('div.x5').get_text().replace('\n','').replace(' ',''),
-            'precio'    :   int(item.select_one('div.aditem-price').get_text()[:-1]),
+            'precio'    :   float(item.select_one('div.aditem-price').get_text()[:-1]),
             'coin'      :   item.select_one('div.aditem-price').get_text()[-1:],
             'abstract'  :   item.select_one('div.tx').get_text()
         } for item in items]
@@ -248,18 +250,16 @@ class Milanuncios:
                 return items_with_phone, True, b_next_page # that true is b_minutes_reached
 
             # Test ad filters
-            filtro_ok = False
-            for filtro in filtros:
+            sin_ok = True
+            for sin in filters_without:
+                if re.search(sin, item['abstract'], flags=re.IGNORECASE):
+                    sin_ok = False
+                    if DEBUG: print('Skipping item (\'{0}\' found)'.format(sin))
+                    break
 
-                sin_ok = True
-                for sin in filtro['sin']:
-                    if re.search(sin, item['abstract'], flags=re.IGNORECASE):
-                        sin_ok = False
-                        if DEBUG: print('Skipping item (\'{0}\' found)'.format(sin))
-                        break
-
-                con_ok = False
-                for con_list in filtro['con']:
+            con_ok = False
+            if sin_ok:
+                for con_list in filters_with:
                     con_list_ok = True
                     for con in con_list:
                         if not re.search(con, item['abstract'], flags=re.IGNORECASE):
@@ -270,12 +270,8 @@ class Milanuncios:
                         con_ok = True
                         break
 
-                if sin_ok and con_ok:
-                    filtro_ok = True
-                    break
 
-            # Ad filters ok?
-            if filtro_ok:
+            if sin_ok and con_ok:
 
                 # If so, look for phone info
                 item_with_phone = item
@@ -325,16 +321,18 @@ class Milanuncios:
     #
     #########################################################
 
-    def query(self,
-              zona,
-              desde,
-              hasta,
-              query,
-              filtros,
-              max_pag=3,
-              max_minutes=60*24,
-              max_ads=99999
-              ):
+    def query(
+            self,
+            query,
+            zone='',
+            price_min=0,
+            price_max=9999999,
+            filters_with=[],
+            filters_without=[],
+            max_pag=3,
+            max_minutes=60*24,
+            max_ads=99999
+            ):
 
         args = locals()
         del args['self']

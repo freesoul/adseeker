@@ -291,13 +291,13 @@ var esmipri2=true;
 
         <div class="searchAdBoxItemForFour">
             <div class="buscador-precio left">
-                <input maxlength="7" onkeypress="return solonumeros(event)" name="desde" id="desde" placeholder="Precio desde" size="4" class="left" tabindex="15" value="" onkeydown="if(event.keyCode==13) cabu()" type="text">
+                <input maxlength="7" onkeypress="return solonumeros(event)" name="price_min" id="price_min" placeholder="Precio price_min" size="4" class="left" tabindex="15" value="" onkeydown="if(event.keyCode==13) cabu()" type="text">
             </div>
         </div>
 
         <div class="searchAdBoxItemForFour">
             <div class="buscador-precio right">
-                <input maxlength="7" onkeypress="return solonumeros(event)" name="hasta" id="hasta" placeholder="Hasta" size="5" class="right" tabindex="25" value="" onkeydown="if(event.keyCode==13) cabu()" type="text">
+                <input maxlength="7" onkeypress="return solonumeros(event)" name="price_max" id="price_max" placeholder="price_max" size="5" class="right" tabindex="25" value="" onkeydown="if(event.keyCode==13) cabu()" type="text">
             </div>
         </div>
 
@@ -346,7 +346,7 @@ var esmipri2=true;
         if (typeof(modelin) != 'undefined' && modelin != null)
             modelin.innerHTML = '<input onkeydown="if(event.keyCode==13) cabu();" type=text onfocus="if(this.value==\'modelo\')this.value=\'\';" id="palabras" maxlength="30" size=11 class="imputs" value="modelo" tabindex="6" style="width:86%">';
     function ponvalores(){
-ponval('palabras', 'portátil i7');ponval('desde', '150');ponval('hasta', '400');ponval('demanda', 'n');ponval('vendedor', 'part');                var provinciaOpt;
+ponval('palabras', 'portátil i7');ponval('price_min', '150');ponval('price_max', '400');ponval('demanda', 'n');ponval('vendedor', 'part');                var provinciaOpt;
                 var selectProvinciaOpts = document.getElementById('protmp').options;
                 for (var i = 0; i < selectProvinciaOpts.length; i++){
                     if(selectProvinciaOpts[i].value == 'madrid') {
@@ -368,7 +368,7 @@ ponval('provincia','madrid_cerca'); ponval('protmp','madrid_cerca');    }
     _gaq.push(['_setAccount', 'UA-4417988-1']);
     _gaq.push(['_setCustomVar', 1, 'seccion', 'informatica', 3]);
         _gaq.push(['_setCustomVar', 3, 'provincia', 'madrid_cerca', 3]);
-    _gaq.push(['_trackPageview','/anuncios-en-madrid/port%C3%A1til-i7.htm?cerca=s&vendedor=part&demanda=n&desde=150&hasta=400']);
+    _gaq.push(['_trackPageview','/anuncios-en-madrid/port%C3%A1til-i7.htm?cerca=s&vendedor=part&demanda=n&price_min=150&price_max=400']);
         (function() {
     var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
@@ -2271,8 +2271,8 @@ se sustituyó la grabadora de dvd<span class="readMoreHidden" id="readMoreTx-258
 <div id="partner-milanuncios" class="afs-block" style="display: block;"></div>
         <div class="adlist-paginator-box">
             <div class="adlist-paginator-pages">
-<div class="adlist-paginator-pagelink adlist-paginator-pageselected"><a href="?vendedor=part&amp;demanda=n&amp;desde=150&amp;hasta=400&amp;cerca=s">1</a></div><div class="adlist-paginator-pagelink" onclick="pSiguiente('?vendedor=part&amp;demanda=n&amp;desde=150&amp;hasta=400&amp;pagina=2&amp;cerca=s')"><a href="?vendedor=part&amp;demanda=n&amp;desde=150&amp;hasta=400&amp;pagina=2&amp;cerca=s">2</a></div><div class="adlist-paginator-pagelink" onclick="location='?vendedor=part&amp;demanda=n&amp;desde=150&amp;hasta=400&amp;pag'+'ina=3&amp;cerca=s'"><a href="?vendedor=part&amp;demanda=n&amp;desde=150&amp;hasta=400&amp;pagina=3&amp;cerca=s">3</a></div><div class="adlist-paginator-pagelink" onclick="location='?vendedor=part&amp;demanda=n&amp;desde=150&amp;hasta=400&amp;pag'+'ina=4&amp;cerca=s'"><a href="?vendedor=part&amp;demanda=n&amp;desde=150&amp;hasta=400&amp;pagina=4&amp;cerca=s">4</a></div>                <div class="adlist-paginator-pagelink adlist-paginator-pageselected" onclick="pSiguiente('?vendedor=part&amp;demanda=n&amp;desde=150&amp;hasta=400&amp;pagina=2&amp;cerca=s')">
-                        <a href="?vendedor=part&amp;demanda=n&amp;desde=150&amp;hasta=400&amp;pagina=2&amp;cerca=s">Siguiente</a>
+<div class="adlist-paginator-pagelink adlist-paginator-pageselected"><a href="?vendedor=part&amp;demanda=n&amp;price_min=150&amp;price_max=400&amp;cerca=s">1</a></div><div class="adlist-paginator-pagelink" onclick="pSiguiente('?vendedor=part&amp;demanda=n&amp;price_min=150&amp;price_max=400&amp;pagina=2&amp;cerca=s')"><a href="?vendedor=part&amp;demanda=n&amp;price_min=150&amp;price_max=400&amp;pagina=2&amp;cerca=s">2</a></div><div class="adlist-paginator-pagelink" onclick="location='?vendedor=part&amp;demanda=n&amp;price_min=150&amp;price_max=400&amp;pag'+'ina=3&amp;cerca=s'"><a href="?vendedor=part&amp;demanda=n&amp;price_min=150&amp;price_max=400&amp;pagina=3&amp;cerca=s">3</a></div><div class="adlist-paginator-pagelink" onclick="location='?vendedor=part&amp;demanda=n&amp;price_min=150&amp;price_max=400&amp;pag'+'ina=4&amp;cerca=s'"><a href="?vendedor=part&amp;demanda=n&amp;price_min=150&amp;price_max=400&amp;pagina=4&amp;cerca=s">4</a></div>                <div class="adlist-paginator-pagelink adlist-paginator-pageselected" onclick="pSiguiente('?vendedor=part&amp;demanda=n&amp;price_min=150&amp;price_max=400&amp;pagina=2&amp;cerca=s')">
+                        <a href="?vendedor=part&amp;demanda=n&amp;price_min=150&amp;price_max=400&amp;pagina=2&amp;cerca=s">Siguiente</a>
                 </div>
             </div>
         </div>
@@ -2348,7 +2348,7 @@ se sustituyó la grabadora de dvd<span class="readMoreHidden" id="readMoreTx-258
         }
 
         var direct = 'anuncios';
-        var variab = '/'+'portátil-i7'+'.htm?vendedor=part&demanda=n&desde=150&hasta=400';
+        var variab = '/'+'portátil-i7'+'.htm?vendedor=part&demanda=n&price_min=150&price_max=400';
         var svr = 'https://static.milanuncios.com';
         mapa();
     // --></script>
